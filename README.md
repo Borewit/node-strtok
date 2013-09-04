@@ -1,3 +1,6 @@
+** this fork is published as the nmm module `strtok2` **
+
+
 A streaming tokenizer for [NodeJS](http://nodejs.org).
 
 Parsing data coming off the wire in an event-driven environment can be a
