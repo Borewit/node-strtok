@@ -11,7 +11,11 @@ util.runParseTests('\x04asdfaoeu', [
     },
     function(v) {
         assert.strictEqual(v, 4);
-        return new strtok.IgnoreType(4, new strtok.BufferType(4));
+        return new strtok.IgnoreType(4);
+    },
+    function(v) {
+        assert.equal(v, null);
+        return new strtok.BufferType(4);
     },
     function(v) {
         assert.ok(Buffer.isBuffer(v));
