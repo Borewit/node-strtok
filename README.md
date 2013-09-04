@@ -1,4 +1,4 @@
-** this fork is published as the nmm module `strtok2` **
+*** this fork is published as the npm module `strtok2` ***
 
 
 A streaming tokenizer for [NodeJS](http://nodejs.org).
