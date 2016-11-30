@@ -13,9 +13,6 @@
     "type": "git",
     "url": "http://github.com/pgriess/node-strtok"
   },
-  "license": {
-    "type": "BSD",
-    "url": "http://github.com/pgriess/node-strtok/blob/master/LICENSE"
-  },
+  "license": "BSD",
   "main": "./lib/strtok.js"
 }
