@@ -17,5 +17,6 @@
     "type": "BSD",
     "url": "http://github.com/pgriess/node-strtok/blob/master/LICENSE"
   },
-  "main": "./lib/strtok.js"
+  "main": "./lib/strtok.js",
+  "typings": "lib/index"
 }
