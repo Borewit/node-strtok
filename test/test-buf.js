@@ -2,7 +2,7 @@
 
 var assert = require('assert');
 var util = require('./util');
-var strtok = require('../lib/strtok');
+var strtok = require('../lib');
 
 util.runParseTests('\x05peter', [
     function(v) {
