@@ -1,5 +1,4 @@
-*** this fork is published as the npm module `strtok2` ***
-
+[![Build Status][travis-image]][travis-url] [![NPM version][npm-image]][npm-url] [![npm downloads][npm-downloads-image]][npm-url]
 
 A streaming tokenizer for [NodeJS](http://nodejs.org).
 
@@ -160,7 +159,7 @@ repeat.
 ### A more complex example
 
 The
-[examples/msgpack/msgpack.js](http://github.com/pgriess/node-strtok/blob/master/examples/msgpack/msgpack.js)
+[examples/msgpack/msgpack.js](https://github.com/Borewit/strtok2/blob/master/examples/msgpack/msgpack.js)
 file contains an implementation of the [MsgPack serialization
 spec](http://redmine.msgpack.org/projects/msgpack/wiki/FormatSpec).
 
@@ -179,3 +178,10 @@ An example run of the built-in `examples/msgpack/bench.js`:
     strtok
       pack:   15861 ms (108% of json)
       unpack: 46650 ms (92% of json)
+      
+[npm-url]: https://npmjs.org/package/strtok2
+[npm-image]: https://badge.fury.io/js/strtok2.svg
+[npm-downloads-image]: http://img.shields.io/npm/dm/strtok2.svg
+
+[travis-url]: https://travis-ci.org/profile/Borewit/strtok2
+[travis-image]: https://api.travis-ci.org/Borewit/strtok2.svg?branch=master
