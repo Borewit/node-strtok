@@ -2,7 +2,7 @@
   "name": "strtok2",
   "version": "1.0.1",
   "description": "A streaming tokenizer",
-  "author": "Peter Griess <pg@std.in>",
+  "author": "Borewit",
   "scripts": {
     "test": "find test/ -name 'test-*.js' -exec node {} \\;"
   },
@@ -11,12 +11,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "http://github.com/pgriess/node-strtok"
+    "url": "https://github.com/Borewit/strtok2"
   },
   "license": {
     "type": "BSD",
-    "url": "http://github.com/pgriess/node-strtok/blob/master/LICENSE"
+    "url": "https://github.com/Borewit/strtok2/blob/Typings/LICENSE"
   },
   "main": "./lib/index.js",
-  "typings": "lib/index"
+  "typings": "lib/index",
+  "bugs": {
+    "url": "https://github.com/Borewit/strtok2/issues"
+  }
 }
