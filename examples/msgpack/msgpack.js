@@ -2,7 +2,7 @@
 
 var assert = require('assert');
 var Buffer = require('buffer').Buffer;
-var strtok = require('../../lib/strtok');
+var strtok = require('../../lib');
 
 var PACKBUF = new Buffer(1024);
 

@@ -2,7 +2,7 @@
 
 var assert = require('assert');
 var EventEmitter = require('events').EventEmitter;
-var strtok = require('../lib/strtok');
+var strtok = require('../lib');
 var sys = require('sys');
 var util = require('./util');
 

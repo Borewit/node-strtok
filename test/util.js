@@ -3,7 +3,7 @@
 var assert = require('assert');
 var Buffer = require('buffer').Buffer;
 var EventEmitter = require('events').EventEmitter;
-var strtok = require('../lib/strtok');
+var strtok = require('../lib');
 var sys = require('sys');
 
 // A mock stream implementation that breaks up provided data into

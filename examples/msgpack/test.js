@@ -2,7 +2,7 @@ var assert = require('assert');
 var Buffer = require('buffer').Buffer;
 var msgpack = require('./msgpack');
 var msgpackNative = require('msgpack');
-var strtok = require('../../lib/strtok');
+var strtok = require('../../lib');
 var util = require('../../test/util');
 
 var dumpBuffer = function(b) {

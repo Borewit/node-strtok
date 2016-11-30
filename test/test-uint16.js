@@ -2,7 +2,7 @@
 
 var assert = require('assert');
 var util = require('./util');
-var strtok = require('../lib/strtok');
+var strtok = require('../lib');
 
 util.runGenerateTests(
     [function(b) {

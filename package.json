@@ -1,6 +1,6 @@
 {
   "name": "strtok2",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A streaming tokenizer",
   "author": {
     "name": "Borewit",
@@ -29,5 +29,9 @@
     "url": "https://github.com/Borewit/strtok2"
   },
   "license": "BSD",
-  "main": "./lib/strtok.js"
+  "main": "./lib/strtok.js",
+  "typings": "lib/index",
+  "bugs": {
+    "url": "https://github.com/Borewit/strtok2/issues"
+  }
 }

@@ -4,7 +4,7 @@ var assert = require('assert');
 var Buffer = require('buffer').Buffer;
 var EventEmitter = require('events').EventEmitter;
 var util = require('./util');
-var strtok = require('../lib/strtok');
+var strtok = require('../lib');
 
 util.runParseTests('\x1a\x1a\x1a\x1a\x1a\x1a', [
     function(v) {

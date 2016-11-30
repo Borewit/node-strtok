@@ -2,7 +2,7 @@
 
 var assert = require('assert');
 var util = require('./util');
-var strtok = require('../lib/strtok');
+var strtok = require('../lib');
 
 var f = function(v, cb) {
     assert.equal(v, 0x1a);
