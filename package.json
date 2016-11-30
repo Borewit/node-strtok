@@ -29,7 +29,7 @@
     "url": "https://github.com/Borewit/strtok2"
   },
   "license": "BSD",
-  "main": "./lib/strtok.js",
+  "main": "./lib/index.js",
   "typings": "lib/index",
   "bugs": {
     "url": "https://github.com/Borewit/strtok2/issues"
