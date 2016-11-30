@@ -84,7 +84,7 @@ declare module 'strtok2' {
     get: Get
   }
 
-  export class IgnoreToken implements IComplexToken {
+  export class IgnoreType implements IComplexToken {
     len: number
 
     public get: Get
@@ -95,7 +95,7 @@ declare module 'strtok2' {
     constructor(len: number)
   }
 
-  export class BufferToken implements IComplexToken {
+  export class BufferType implements IComplexToken {
     len: number
 
     get: Get
@@ -109,7 +109,7 @@ declare module 'strtok2' {
   /**
    * Consume a fixed number of bytes from the stream and return a string with a specified encoding.
    */
-  export class StringToken implements IComplexToken {
+  export class StringType implements IComplexToken {
     len: number
 
     public get: Get
