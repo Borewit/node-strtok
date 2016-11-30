@@ -11,7 +11,7 @@ This requires a parser that can gracefully handle incomplete messages and
 pick up where it left off. To make this task easier, `node-strtok` provides
 
 * Tokenizing primitives for common network datatypes (e.g. signed and
-  unsigned integers in variois endian-nesses).
+  unsigned integers in various endian-nesses).
 * A callback-driven approach well suited to an asynchronous environment (e.g.
   to allow the application to asynchronously ask another party for
   information about what the next type should be)
@@ -84,7 +84,7 @@ stream immediately before returning `DONE`.
 
 The `DEFER` token indicates that the protocol doesn't know what type of token
 to read from the stream next. Perhaps the protocol needs to consult some
-out-of-process datastructure, or wait for some other event to occur. To support
+out-of-process data-structure, or wait for some other event to occur. To support
 this case, the protocol callback is actually invoked with 2 arguments: the
 value and a defer callback. It is this second parameter, a callback, that must
 be invoked with the desired token type once the protocol layer has figured this
