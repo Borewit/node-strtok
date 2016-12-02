@@ -161,7 +161,7 @@ repeat.
 The
 [examples/msgpack/msgpack.js](https://github.com/Borewit/strtok2/blob/master/examples/msgpack/msgpack.js)
 file contains an implementation of the [MsgPack serialization
-spec](http://redmine.msgpack.org/projects/msgpack/wiki/FormatSpec).
+spec](http://web.archive.org/web/20100628121422/http://redmine.msgpack.org/projects/msgpack/wiki/FormatSpec).
 
 ## Performance
 
