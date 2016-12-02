@@ -54,6 +54,16 @@ export let UINT16_LE: IPrimitiveType
 export let UINT16_BE: IPrimitiveType
 
 /**
+ * 24-bit unsigned integer, Little Endian byte order
+ */
+export let UINT24_LE: IPrimitiveType
+
+/**
+ * 24-bit unsigned integer, Big Endian byte order
+ */
+export let UINT24_BE: IPrimitiveType
+
+/**
  * 32-bit unsigned integer, Little Endian byte order
  */
 export let UINT32_LE: IPrimitiveType
@@ -72,6 +82,11 @@ export let INT8: IPrimitiveType
  * 16-bit signed integer, Big Endian byte order
  */
 export let INT16_BE: IPrimitiveType
+
+/**
+ * 24-bit signed integer, Big Endian byte order
+ */
+export let INT24_BE: IPrimitiveType
 
 /**
  * 32-bit signed integer, Big Endian byte order
