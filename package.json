@@ -28,7 +28,7 @@
     "type": "git",
     "url": "https://github.com/Borewit/strtok2"
   },
-  "license": "BSD-Source-Code",
+  "license": "BSD-3-Clause",
   "main": "./lib/index.js",
   "typings": "lib/index",
   "bugs": {
