@@ -49,6 +49,11 @@ export let UINT8: IPrimitiveType
 export let UINT16_LE: IPrimitiveType
 
 /**
+ * 16-bit unsigned integer, Big Endian byte order
+ */
+export let UINT16_BE: IPrimitiveType
+
+/**
  * 32-bit unsigned integer, Little Endian byte order
  */
 export let UINT32_LE: IPrimitiveType
