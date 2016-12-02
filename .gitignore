@@ -1,3 +1,4 @@
 README.html
 *.iml
 typings
+node_modules
