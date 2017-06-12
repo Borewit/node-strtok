@@ -54,9 +54,11 @@ in parsing that structure.
 
 * `UINT8`
 * `UINT16_BE`, `UINT16_LE`
-* `UINT32_BE`,  `UINT32_LE`
+* `UINT24_BE`, `UINT24_LE`
+* `UINT32_BE`, `UINT32_LE`
 * `INT8`
-* `INT16_BE`
+* `INT16_BE`, `INT16_LE`
+* `INT24_BE`, `INT24_LE`
 * `INT32_BE`
 
 One might notice that there is no support for 64-bit tokens, since JavaScript
@@ -183,5 +185,5 @@ An example run of the built-in `examples/msgpack/bench.js`:
 [npm-image]: https://badge.fury.io/js/strtok2.svg
 [npm-downloads-image]: http://img.shields.io/npm/dm/strtok2.svg
 
-[travis-url]: https://travis-ci.org/profile/Borewit/strtok2
+[travis-url]: https://travis-ci.org/Borewit/strtok2
 [travis-image]: https://api.travis-ci.org/Borewit/strtok2.svg?branch=master
