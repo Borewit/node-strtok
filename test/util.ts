@@ -1,141 +1,159 @@
 // Utilies for testing
 
-var assert = require('assert');
-var Buffer = require('buffer').Buffer;
-var EventEmitter = require('events').EventEmitter;
-var strtok = require('../lib');
-var sys = require('sys');
+import {assert} from 'chai'
+import {EventEmitter} from 'events'
+import  * as strtok from '../lib'
+import {IGetToken, IToken} from "../lib/index";
 
-// A mock stream implementation that breaks up provided data into
-// random-sized chunks and emits 'data' events. This is used to simulate
-// data arriving with arbitrary packet boundaries.
-var SourceStream = function(str, min, max) {
-    EventEmitter.call(this);
+/**
+ * A mock stream implementation that breaks up provided data into
+ * random-sized chunks and emits 'data' events. This is used to simulate
+ * data arriving with arbitrary packet boundaries.
+ */
+export class SourceStream extends EventEmitter {
 
-    str = str || '';
-    min = min || 1;
-    max = max || str.length;
+    private buf: Buffer;
 
-    var self = this;
-    var buf = new Buffer(str, 'binary');
+    constructor(private str: string = '', private min: number = 1, private max: number = str.length) {
+        super();
 
-    var emitData = function() {
-        var len = Math.min(
-            min + Math.floor(Math.random() * (max - min)),
-            buf.length
+        this.buf = new Buffer(str, 'binary');
+
+        process.nextTick(() => this.emitData());
+    }
+
+    private emitData() {
+        const len = Math.min(
+            this.min + Math.floor(Math.random() * (this.max - this.min)),
+            this.buf.length
         );
 
-        var b = buf.slice(0, len);
+        const b = this.buf.slice(0, len);
 
-        if (len < buf.length) {
-            buf = buf.slice(len, buf.length);
-            process.nextTick(emitData);
+        if (len < this.buf.length) {
+            this.buf = this.buf.slice(len, this.buf.length);
+            process.nextTick(() => this.emitData());
         } else {
-            process.nextTick(function() {
-                self.emit('end')
+            process.nextTick(() => {
+                this.emit('end')
             });
         }
 
-        self.emit('data', b);
+        this.emit('data', b);
     };
 
-    process.nextTick(emitData);
-};
-sys.inherits(SourceStream, EventEmitter);
-exports.SourceStream = SourceStream;
 
-// Stream to accept write() calls and track them in its own buffer rather
-// than dumping them to a file descriptor
-var SinkStream = function(bufSz) {
-    var self = this;
+}
 
-    bufSz = bufSz || 1024;
-    var buf = new Buffer(bufSz);
-    var bufOffset = 0;
+/**
+ * Stream to accept write() calls and track them in its own buffer rather
+ * than dumping them to a file descriptor
+ */
+export class SinkStream {
 
-    self.write = function() {
-        var bl = (typeof arguments[0] === 'string') ?
+    private buf: Buffer;
+    private bufOffset: number;
+
+    constructor(private bufSz: number = 1024) {
+        this.buf = new Buffer(bufSz);
+        this.bufOffset = 0;
+    }
+
+    public write(s: string, encoding?: string) {
+        let bl = (typeof arguments[0] === 'string') ?
             Buffer.byteLength(arguments[0], arguments[1]) :
             arguments[0].length;
 
-        if (bufOffset + bl >= buf.length) {
-            var b = new Buffer(((bufOffset + bl + bufSz - 1) / bufSz) * bufSz);
-            buf.copy(b, 0, 0, bufOffset);
-            buf = b;
+        if (this.bufOffset + bl >= this.buf.length) {
+            let b = new Buffer(((this.bufOffset + bl + this.bufSz - 1) / this.bufSz) * this.bufSz);
+            this.buf.copy(b, 0, 0, this.bufOffset);
+            this.buf = b;
         }
 
         if (typeof arguments[0] === 'string') {
-            buf.write(arguments[0], bufOffset, arguments[1]);
+            this.buf.write(arguments[0], this.bufOffset, arguments[1]);
         } else {
-            arguments[0].copy(buf, bufOffset, 0, arguments[0].length);
+            arguments[0].copy(this.buf, this.bufOffset, 0, arguments[0].length);
         }
 
-        bufOffset += bl;
-    };
+        this.bufOffset += bl;
+    }
 
-    self.getBuffer = function() {
-        var b = new Buffer(bufOffset);
-        buf.copy(b, 0, 0, bufOffset);
+    public getBuffer(): Buffer {
+        const b = new Buffer(this.bufOffset);
+        this.buf.copy(b, 0, 0, this.bufOffset);
 
         return b;
-    };
+    }
 
-    self.getString = function() {
-        return self.getBuffer().toString('binary');
-    };
+    public getString(): string {
+        return this.getBuffer().toString('binary');
+    }
 
-    self.reset = function() {
-        bufOffset = 0;
-    };
-};
-exports.SinkStream = SinkStream;
+    public reset() {
+        this.bufOffset = 0;
+    }
+}
 
-var NullStream = function() {
-    var self = this;
+export class NullStream {
 
-    self.write = function() {
+    public write(): boolean {
         return true;
-    };
-};
-exports.NullStream = NullStream;
+    }
+}
 
-// Run the given stream (or string, coverted into a SourceStream) through
-// strtok,parse() and verify types that come back using the given state
-// table.
-var runParseTests = function(s, stateTab) {
+type handleState = (v, cb?) => IGetToken<any> | {};
+
+/**
+ * Run the given stream (or string, converted into a SourceStream) through
+ * strtok,parse() and verify types that come back using the given state table.
+ * @param s
+ * @param stateTab
+ */
+export const runParseTests = function (s: string | EventEmitter, stateTab: handleState[]) {
+
+    let cleanup: boolean = false;
+
     if (typeof s === 'string') {
         s = new SourceStream(s);
+        cleanup = true;
     }
 
     assert.equal(typeof s, 'object');
-    
-    var state = 0;
 
-    process.on('exit', function() {
+    let state = 0;
+
+    process.on('exit', () => {
         assert.equal(stateTab.length, state);
     });
 
-    strtok.parse(s, function(v, cb) {
+    strtok.parse(s, (v, cb) => {
         assert.ok(state >= 0 && state < stateTab.length);
+        if (cleanup && state === stateTab.length - 1) {
+            process.nextTick(() => {
+                (s as EventEmitter).removeAllListeners()
+            })
+        };
         return stateTab[state++](v, cb);
     });
 };
-exports.runParseTests = runParseTests;
 
-// Run a series of tests that generate data and verify the resulting output.
-//
-// Each argument is a different test, and should be an array of length two
-// whose first element is a function and second element is a string
-// representing the expected outcome.
-var runGenerateTests = function() {
-    var b = new Buffer(1024);
+/**
+ * Run a series of tests that generate data and verify the resulting output.
+ *
+ * Each argument is a different test, and should be an array of length two
+ * whose first element is a function and second element is a string
+ * representing the expected outcome.
+ */
+export const runGenerateTests = function ( ...tests:([(b: Buffer) => number, string])[] ) {
+    let b = new Buffer(1024);
 
-    for (var i = 0; i < arguments.length; i++) {
-        var len = arguments[i][0](b);
+    for (let i = 0; i < arguments.length; i++) {
+        const len = arguments[i][0](b);
         assert.strictEqual(
             b.toString('binary', 0, len),
             arguments[i][1]
         );
-    };
+    }
 };
-exports.runGenerateTests = runGenerateTests;
+

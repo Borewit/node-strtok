@@ -1,46 +1,57 @@
 // Test writing and reading uint24 values in different endiannesses.
 
-var assert = require('assert');
-var util = require('./util');
-var strtok = require('../lib');
+import {} from "mocha"
+import {assert} from 'chai';
+import * as strtok from '../lib';
+import * as util from './util';
 
-util.runGenerateTests(
-    [function(b) {
-        return strtok.UINT24_LE.put(b, 0, 0);
-    }, '\x00\x00\x00'],
-    [function(b) {
-        return strtok.UINT24_LE.put(b, 0, 0xff);
-    }, '\xff\x00\x00'],
-    [function(b) {
-        return strtok.UINT24_BE.put(b, 0, 0);
-    }, '\x00\x00\x00'],
-    [function(b) {
-        return strtok.UINT24_BE.put(b, 0, 0xff);
-    }, '\x00\x00\xff'],
-    [function(b) {
-        return strtok.UINT24_LE.put(b, 0, 0xaabbcc);
-    }, '\xcc\xbb\xaa'],
-    [function(b) {
-        return strtok.UINT24_BE.put(b, 0, 0xaabbcc);
-    }, '\xaa\xbb\xcc']
-);
+describe("Parse 24-bit unsigned integer", () => {
 
-var le = function(v) {
-    assert.equal(v, 0x001a1a);
-    return strtok.UINT24_BE;
-};
+    describe("combined little- and big-endian", () => {
 
-var be = function(v) {
-    assert.equal(v, 0x1a1a00);
-    return strtok.UINT24_LE;
-};
+        it("should encode", () => {
+            util.runGenerateTests(
+                [(b) => {
+                    return strtok.UINT24_LE.put(b, 0, 0);
+                }, '\x00\x00\x00'],
+                [(b) => {
+                    return strtok.UINT24_LE.put(b, 0, 0xff);
+                }, '\xff\x00\x00'],
+                [(b) => {
+                    return strtok.UINT24_BE.put(b, 0, 0);
+                }, '\x00\x00\x00'],
+                [(b) => {
+                    return strtok.UINT24_BE.put(b, 0, 0xff);
+                }, '\x00\x00\xff'],
+                [(b) => {
+                    return strtok.UINT24_LE.put(b, 0, 0xaabbcc);
+                }, '\xcc\xbb\xaa'],
+                [(b) => {
+                    return strtok.UINT24_BE.put(b, 0, 0xaabbcc);
+                }, '\xaa\xbb\xcc']
+            );
+        });
 
-util.runParseTests(
-    '\x1a\x1a\x00\x1a\x1a\x00\x1a\x1a\x00\x1a\x1a\x00',
-    [
-        function(v) {
-            assert.ok(v === undefined);
-            return strtok.UINT24_LE;
-        },
-        le, be, le, be
-]);
+        it("should decode", () => {
+            const le = function (v) {
+                assert.equal(v, 0x001a1a);
+                return strtok.UINT24_BE;
+            };
+
+            const be = function (v) {
+                assert.equal(v, 0x1a1a00);
+                return strtok.UINT24_LE;
+            };
+
+            util.runParseTests(
+                '\x1a\x1a\x00\x1a\x1a\x00\x1a\x1a\x00\x1a\x1a\x00',
+                [
+                    (v) => {
+                        assert.ok(v === undefined);
+                        return strtok.UINT24_LE;
+                    },
+                    le, be, le, be
+                ]);
+        });
+    });
+});

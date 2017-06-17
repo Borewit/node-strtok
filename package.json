@@ -19,7 +19,8 @@
     }
   ],
   "scripts": {
-    "test": "find test/ -name 'test-*.js' -exec node {} \\;"
+    "compile": "tsc",
+    "test": "mocha --require ts-node/register test"
   },
   "engines": {
     "node": ">=0.1.98"
@@ -33,5 +34,14 @@
   "typings": "lib/index",
   "bugs": {
     "url": "https://github.com/Borewit/strtok2/issues"
+  },
+  "devDependencies": {
+    "typescript": "^2.3.4",
+    "typings": "^2.1.1",
+    "@types/chai": "^4.0.0",
+    "@types/mocha": "^2.2.41",
+    "@types/node": "^7.0.31",
+    "chai": "^4.0.2",
+    "ts-node": "^3.0.6"
   }
 }

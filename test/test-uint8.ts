@@ -1,27 +1,37 @@
 // Test writing and reading uint8 values.
 
-var assert = require('assert');
-var util = require('./util');
-var strtok = require('../lib');
+import {} from "mocha"
+import {assert} from 'chai';
+import * as strtok from '../lib';
+import * as util from './util';
 
-util.runGenerateTests(
-    [function(b) {
-        return strtok.UINT8.put(b, 0, 0x22);
-    }, '\x22'],
-    [function(b) {
-        return strtok.UINT8.put(b, 0, 0xff);
-    }, '\xff']
-);
+describe("Parse 8-bit unsigned integer (UINT8)", () => {
 
-var f = function(v) {
-    assert.equal(v, 0x1a);
-    return strtok.UINT8;
-};
+    it("should encode", () => {
+        util.runGenerateTests(
+            [(b) => {
+                return strtok.UINT8.put(b, 0, 0x22);
+            }, '\x22'],
+            [(b) => {
+                return strtok.UINT8.put(b, 0, 0xff);
+            }, '\xff']
+        );
+    });
 
-util.runParseTests('\x1a\x1a\x1a\x1a\x1a\x1a', [
-    function(v) {
-        assert.strictEqual(v, undefined);
-        return strtok.UINT8;
-    },
-    f, f, f, f, f, f
-]);
+    it("should decode", () => {
+
+        const f = function(v) {
+            assert.equal(v, 0x1a);
+            return strtok.UINT8;
+        };
+
+        util.runParseTests('\x1a\x1a\x1a\x1a\x1a\x1a', [
+            function(v) {
+                assert.strictEqual(v, undefined);
+                return strtok.UINT8;
+            },
+            f, f, f, f, f, f
+        ]);
+    });
+});
+

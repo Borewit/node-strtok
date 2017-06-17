@@ -1,13 +1,14 @@
 // A fast streaming parser library.
 
-var assert = require('assert');
-var Buffer = require('buffer').Buffer;
+import * as assert from 'assert';
+//import * as buffer from 'buffer';
+import {Buffer} from "buffer";
 
 // Buffer for parse() to handle types that span more than one buffer
-var SPANNING_BUF = new Buffer(1024);
+let SPANNING_BUF = new Buffer(1024);
 
 // Possibly call flush()
-var maybeFlush = function(b, o, len, flush) {
+const maybeFlush = function(b, o, len, flush) {
     if (o + len > b.length) {
         if (typeof(flush) !== 'function') {
             throw new Error(
@@ -25,89 +26,132 @@ var maybeFlush = function(b, o, len, flush) {
 
 // Sentinel types
 
-var DEFER = {};
-exports.DEFER = DEFER;
+/**
+ * The DEFER token indicates that the protocol doesn't know what type of token to read from the stream next.
+ * Perhaps the protocol needs to consult some out-of-process datastructure, or wait for some other event to occur.
+ * To support this case, the protocol callback is actually invoked with 2 arguments: the value and a defer callback.
+ * It is this second parameter, a callback, that must be invoked with the desired token type once the protocol layer has figured this out.
+ * Note that between the time DEFER is returned and the callback is invoked, strtok.parse() is buffering all data received from the stream.
+ */
+export const DEFER = {};
 
-var DONE = {};
-exports.DONE = DONE;
+/**
+ * Indicates that the protocol parsing loop has come to an end, and that no more data need be read off of the stream
+ * This causes strtok.parse() to disengage from the stream.
+ */
+export const DONE = {};
+
+export interface IGetToken<T> {
+
+    len: number;
+
+    get: (buf: Buffer, off: number) => T;
+}
+
+export type IFlush = (b: Buffer, o: number) => void;
+
+export interface IToken<T> extends IGetToken<T> {
+    put: (buffer: Buffer, offset: number, value: T, flush?: IFlush) => number
+}
 
 // Primitive types
 
-var UINT8 = {
-    len : 1,
-    get : function(buf, off) {
+/**
+ * 8-bit unsigned integer
+ */
+export const UINT8: IToken<number> = {
+
+    len: 1,
+
+    get: function (buf, off): number {
         return buf[off];
     },
-    put : function(b, o, v, flush) {
+
+    put: function (b: Buffer, o: number, v: number, flush: IFlush): number {
         assert.equal(typeof o, 'number');
         assert.equal(typeof v, 'number');
         assert.ok(v >= 0 && v <= 0xff);
         assert.ok(o >= 0);
         assert.ok(this.len <= b.length);
 
-        var no = maybeFlush(b, o, this.len, flush);
+        const no = maybeFlush(b, o, this.len, flush);
         b[no] = v & 0xff;
 
         return (no - o) + this.len;
     }
 };
-exports.UINT8 = UINT8;
 
-var UINT16_LE = {
-    len : 2,
-    get : function(buf, off) {
+/**
+ * 16-bit unsigned integer, Little Endian byte order
+ */
+export const UINT16_LE: IToken<number> = {
+
+    len: 2,
+
+    get: function (buf, off): number {
         return buf[off] | (buf[off + 1] << 8);
     },
-    put : function(b, o, v, flush) {
+
+    put: function (b: Buffer, o: number, v: number, flush: IFlush): number {
         assert.equal(typeof o, 'number');
         assert.equal(typeof v, 'number');
         assert.ok(v >= 0 && v <= 0xffff);
         assert.ok(o >= 0);
         assert.ok(this.len <= b.length);
 
-        var no = maybeFlush(b, o, this.len, flush);
+        const no = maybeFlush(b, o, this.len, flush);
         b[no] = v & 0xff;
         b[no + 1] = (v >>> 8) & 0xff;
 
         return (no - o) + this.len;
     }
 };
-exports.UINT16_LE = UINT16_LE;
 
-var UINT16_BE = {
-    len : 2,
-    get : function(buf, off) {
+/**
+ * 16-bit unsigned integer, Big Endian byte order
+ */
+export const UINT16_BE: IToken<number> = {
+
+    len: 2,
+
+    get: function (buf, off): number {
         return (buf[off] << 8) | buf[off + 1];
     },
-    put : function(b, o, v, flush) {
+
+    put: function (b: Buffer, o: number, v: number, flush: IFlush): number {
         assert.equal(typeof o, 'number');
         assert.equal(typeof v, 'number');
         assert.ok(v >= 0 && v <= 0xffff);
         assert.ok(o >= 0);
         assert.ok(this.len <= b.length);
 
-        var no = maybeFlush(b, o, this.len, flush);
+        const no = maybeFlush(b, o, this.len, flush);
         b[no] = (v >>> 8) & 0xff;
         b[no + 1] = v & 0xff;
 
         return (no - o) + this.len;
     }
 };
-exports.UINT16_BE = UINT16_BE;
 
-var UINT24_LE = {
-    len : 3,
-    get : function(buf, off) {
+/**
+ * 24-bit unsigned integer, Little Endian byte order
+ */
+export const UINT24_LE: IToken<number> = {
+
+    len: 3,
+
+    get: function (buf, off): number {
         return buf[off] | (buf[off + 1] << 8) | (buf[off + 2] << 16);
     },
-    put : function(b, o, v, flush) {
+
+    put: function (b: Buffer, o: number, v: number, flush: IFlush): number {
         assert.equal(typeof o, 'number');
         assert.equal(typeof v, 'number');
         assert.ok(v >= 0 && v <= 0xffffff);
         assert.ok(o >= 0);
         assert.ok(this.len <= b.length);
 
-        var no = maybeFlush(b, o, this.len, flush);
+        const no = maybeFlush(b, o, this.len, flush);
         b[no] = v & 0xff;
         b[no + 1] = (v >>> 8) & 0xff;
         b[no + 2] = (v >>> 16) & 0xff;
@@ -115,9 +159,11 @@ var UINT24_LE = {
         return (no - o) + this.len;
     }
 };
-exports.UINT24_LE = UINT24_LE;
 
-var UINT24_BE = {
+/**
+ * 24-bit unsigned integer, Big Endian byte order
+ */
+export const UINT24_BE: IToken<number> = {
     len : 3,
     get : function (buf, off) {
         return (((buf[off] << 8) + buf[off + 1]) << 8) + buf[off + 2]
@@ -137,26 +183,31 @@ var UINT24_BE = {
         return (no - o) + this.len;
     }
 };
-exports.UINT24_BE = UINT24_BE;
 
-var UINT32_LE = {
-    len : 4,
-    get : function(buf, off) {
+/**
+ * 32-bit unsigned integer, Little Endian byte order
+ */
+export const UINT32_LE: IToken<number> = {
+
+    len: 4,
+
+    get: function (buf, off): number {
         // Shifting the MSB by 24 directly causes it to go negative if its
         // last bit is high, so we instead shift by 23 and multiply by 2.
         // Also, using binary OR to count the MSB if its last bit is high
         // causes the value to go negative. Use addition there.
         return (buf[off] | (buf[off + 1] << 8) | (buf[off + 2] << 16)) +
-               ((buf[off + 3] << 23) * 2);
+            ((buf[off + 3] << 23) * 2);
     },
-    put : function(b, o, v, flush) {
+
+    put: function (b: Buffer, o: number, v: number, flush: IFlush): number {
         assert.equal(typeof o, 'number');
         assert.equal(typeof v, 'number');
         assert.ok(v >= 0 && v <= 0xffffffff);
         assert.ok(o >= 0);
         assert.ok(this.len <= b.length);
 
-        var no = maybeFlush(b, o, this.len, flush);
+        const no = maybeFlush(b, o, this.len, flush);
         b[no] = v & 0xff;
         b[no + 1] = (v >>> 8) & 0xff;
         b[no + 2] = (v >>> 16) & 0xff;
@@ -165,23 +216,28 @@ var UINT32_LE = {
         return (no - o) + this.len;
     }
 };
-exports.UINT32_LE = UINT32_LE;
 
-var UINT32_BE = {
-    len : 4,
-    get : function(buf, off) {
+/**
+ * 32-bit unsigned integer, Big Endian byte order
+ */
+export const UINT32_BE: IToken<number> = {
+
+    len: 4,
+
+    get: function (buf, off): number {
         // See comments in UINT32_LE.get()
         return ((buf[off] << 23) * 2) +
-               ((buf[off + 1] << 16) | (buf[off + 2] << 8) | buf[off + 3]);
+            ((buf[off + 1] << 16) | (buf[off + 2] << 8) | buf[off + 3]);
     },
-    put : function(b, o, v, flush) {
+
+    put: function (b: Buffer, o: number, v: number, flush: IFlush): number {
         assert.equal(typeof o, 'number');
         assert.equal(typeof v, 'number');
         assert.ok(v >= 0 && v <= 0xffffffff);
         assert.ok(o >= 0);
         assert.ok(this.len <= b.length);
 
-        var no = maybeFlush(b, o, this.len, flush);
+        const no = maybeFlush(b, o, this.len, flush);
         b[no] = (v >>> 24) & 0xff;
         b[no + 1] = (v >>> 16) & 0xff;
         b[no + 2] = (v >>> 8) & 0xff;
@@ -190,70 +246,79 @@ var UINT32_BE = {
         return (no - o) + this.len;
     }
 };
-exports.UINT32_BE = UINT32_BE;
 
-var INT8 = {
-    len : 1,
-    get : function(buf, off)  {
-        var v = UINT8.get(buf, off);
+/**
+ * 8-bit signed integer
+ */
+export const INT8: IToken<number> = {
+
+    len: 1,
+
+    get: function (buf, off): number {
+        const v = UINT8.get(buf, off);
         return ((v & 0x80) === 0x80) ?
             (-128 + (v & 0x7f)) :
             v;
     },
-    put : function(b, o, v, flush) {
+
+    put: function (b: Buffer, o: number, v: number, flush: IFlush): number {
         assert.equal(typeof o, 'number');
         assert.equal(typeof v, 'number');
         assert.ok(v >= -128 && v <= 127);
         assert.ok(o >= 0);
         assert.ok(this.len <= b.length);
 
-        var no = maybeFlush(b, o, this.len, flush);
+        const no = maybeFlush(b, o, this.len, flush);
         b[no] = v & 0xff;
 
         return (no - o) + this.len;
     }
 };
-exports.INT8 = INT8;
 
-var INT16_BE = {
-    len : 2,
-    get : function(buf, off)  {
-        var v = UINT16_BE.get(buf, off);
+/**
+ * 16-bit signed integer, Big Endian byte order
+ */
+export const INT16_BE: IToken<number> = {
+    len: 2,
+    get: function (buf, off): number {
+        const v = UINT16_BE.get(buf, off);
         return ((v & 0x8000) === 0x8000) ?
             (-32768 + (v & 0x7fff)) :
             v;
     },
-    put : function(b, o, v, flush) {
+    put: function (b: Buffer, o: number, v: number, flush: IFlush): number {
         assert.equal(typeof o, 'number');
         assert.equal(typeof v, 'number');
         assert.ok(v >= -32768 && v <= 32767);
         assert.ok(o >= 0);
         assert.ok(this.len <= b.length);
 
-        var no = maybeFlush(b, o, this.len, flush);
+        const no = maybeFlush(b, o, this.len, flush);
         b[no] = ((v & 0xffff) >>> 8) & 0xff;
         b[no + 1] = v & 0xff;
 
         return (no - o) + this.len;
     }
 };
-exports.INT16_BE = INT16_BE;
 
-var INT24_BE = {
-    len : 3,
-    get : function(buf, off)  {
-       var v = UINT24_BE.get(buf, off);
+/**
+ * 24-bit signed integer, Big Endian byte order
+ */
+export const INT24_BE: IToken<number> = {
+    len: 3,
+    get: function (buf, off): number {
+        const v = UINT24_BE.get(buf, off);
         return ((v & 0x800000) === 0x800000) ?
-          (-0x800000 + (v & 0x7fffff)) : v;
+            (-0x800000 + (v & 0x7fffff)) : v;
     },
-    put : function(b, o, v, flush) {
+    put: function (b: Buffer, o: number, v: number, flush: IFlush): number {
         assert.equal(typeof o, 'number');
         assert.equal(typeof v, 'number');
         assert.ok(v >= -0x800000 && v <= 0x7fffff);
         assert.ok(o >= 0);
         assert.ok(this.len <= b.length);
 
-        var no = maybeFlush(b, o, this.len, flush);
+        const no = maybeFlush(b, o, this.len, flush);
         b[no] = (v >>> 16) & 0xff;
         b[no + 1] = (v >>> 8) & 0xff;
         b[no + 2] = v & 0xff;
@@ -261,28 +326,30 @@ var INT24_BE = {
         return (no - o) + this.len;
     }
 };
-exports.INT24_BE = INT24_BE;
 
-var INT32_BE = {
-    len : 4,
-    get : function(buf, off)  {
+/**
+ * 32-bit signed integer, Big Endian byte order
+ */
+export const INT32_BE: IToken<number> = {
+    len: 4,
+    get: function (buf, off): number {
         // We cannot check for 0x80000000 directly, as this always returns
         // false. Instead, check for the two's-compliment value, which
         // behaves as expected. Also, we cannot subtract our value all at
         // once, so do it in two steps to avoid sign busting.
-        var v = UINT32_BE.get(buf, off);
+        const v = UINT32_BE.get(buf, off);
         return ((v & 0x80000000) === -2147483648) ?
             ((v & 0x7fffffff) - 1073741824 - 1073741824) :
             v;
     },
-    put : function(b, o, v, flush) {
+    put: function (b: Buffer, o: number, v: number, flush: IFlush): number {
         assert.equal(typeof o, 'number');
         assert.equal(typeof v, 'number');
         assert.ok(v >= -2147483648 && v <= 2147483647);
         assert.ok(o >= 0);
         assert.ok(this.len <= b.length);
 
-        var no = maybeFlush(b, o, this.len, flush);
+        const no = maybeFlush(b, o, this.len, flush);
         b[no] = (v >>> 24) & 0xff;
         b[no + 1] = (v >>> 16) & 0xff;
         b[no + 2] = (v >>> 8) & 0xff;
@@ -291,66 +358,75 @@ var INT32_BE = {
         return (no - o) + this.len;
     }
 };
-exports.INT32_BE = INT32_BE;
+
 
 // Complex types
 //
 // These types are intended to allow callers to re-use them by manipulating
 // the 'len' and other properties directly.
 
-var IgnoreType = function(l) {
-  this.len = l;
-  this.get = function() {
-    return null;
-  };
-};
-exports.IgnoreType = IgnoreType;
+export class IgnoreType implements IGetToken<Buffer> {
+
+    /**
+     * @param len number of bytes to ignore
+     */
+    constructor(public len: number) {
+    }
+
+    // ToDo: don't read, but skip data
+    public get(buf: Buffer, off: number): Buffer {
+        return null;
+    }
+}
 
 
-var BufferType = function(l) {
-    var self = this;
+export class BufferType implements IGetToken<Buffer> {
 
-    self.len = l;
+    constructor(public len: number) {
+    }
 
-    self.get = function(buf, off) {
+    public get(buf: Buffer, off: number): Buffer {
         return buf.slice(off, off + this.len);
-    };
-};
-exports.BufferType = BufferType;
+    }
+}
 
-var StringType = function(l, e) {
-    var self = this;
+/**
+ * Consume a fixed number of bytes from the stream and return a string with a specified encoding.
+ */
+export class StringType implements IGetToken<string> {
 
-    self.len = l;
+    constructor(public len: number, public encoding: string) {
+    }
 
-    self.encoding = e;
+    public get(buf: Buffer, off: number): string {
+        return buf.toString(this.encoding, off, off + this.len);
+    }
+}
 
-    self.get = function(buf, off) {
-        return buf.toString(e, off, off + this.len);
-    };
-};
-exports.StringType = StringType;
-
-// Parse a stream
-var parse = function(s, cb) {
+/**
+ * @param stream any EventEmitter that pumps out data events
+ * @param cb invoked when a complete token has been read from the stream
+ * @return Next token to read from the stream
+ */
+export const parse = function(s: any, cb?: any) {
     // Type of data that we're to parse next; if DEFER, we're awaiting
     // an invocation of typeCallback
-    var type = DEFER;
+    let type: IGetToken<any>;
 
     // Data that we've seen but not yet processed / handed off to cb; first
     // valid byte to process is always bufs[0][bufOffset]
-    var bufs = [];
-    var bufsLen = 0;
-    var bufOffset = 0;
-    var ignoreLen = 0;
+    let bufs: Buffer[] = [];
+    let bufsLen: number = 0;
+    let bufOffset: number = 0;
+    let ignoreLen: number = 0;
 
     // Callback for FSM to tell us what type to expect next
-    var typeCallback = function(t) {
+    let typeCallback = (t: IGetToken<any> | {}) => {
         if (type !== DEFER) {
             throw new Error('refusing to overwrite non-DEFER type');
         }
 
-        type = t;
+        type = t as IGetToken<any>;
 
         emitData();
     };
@@ -360,7 +436,7 @@ var parse = function(s, cb) {
     //
     // Out strategy for handling buffers is to shift them off of the bufs[]
     // array until we have enough accumulated to account for type.len bytes.
-    var emitData = function() {
+    const emitData = () => {
         var b;
         while (type !== DONE && type !== DEFER && bufsLen >= type.len) {
             b = bufs[0];
@@ -378,10 +454,10 @@ var parse = function(s, cb) {
                 b = SPANNING_BUF;
                 bo = 0;
 
-                var bytesCopied = 0;
+                let bytesCopied = 0;
                 while (bytesCopied < type.len && bufs.length > 0) {
-                    var bb = bufs[0];
-                    var copyLength = Math.min(type.len - bytesCopied, bb.length - bufOffset);
+                    const bb = bufs[0];
+                    const copyLength = Math.min(type.len - bytesCopied, bb.length - bufOffset);
 
                     // TODO: Manually copy bytes if we don't need many of them.
                     //       Bouncing down into C++ land to invoke
@@ -440,7 +516,7 @@ var parse = function(s, cb) {
                 bufOffset = ignoreLen;
                 ignoreLen = 0;
               }
-              type = cb(type.get(), typeCallback);
+              type = cb(type.get(null, 0), typeCallback);
             }
         }
 
@@ -464,7 +540,7 @@ var parse = function(s, cb) {
     };
 
     // Listen for data from our stream
-    var dataListener = function(d) {
+    const dataListener = function(d) {
         if (d.length <= ignoreLen) {
           // ignore this data
           assert.strictEqual(bufsLen, 0);
@@ -489,4 +565,3 @@ var parse = function(s, cb) {
         s.on('data', dataListener);
     }
 };
-exports.parse = parse;
