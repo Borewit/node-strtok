@@ -1,14 +1,16 @@
 // A fast streaming parser library.
 
 import * as assert from 'assert';
-//import * as buffer from 'buffer';
-import {Buffer} from "buffer";
+import {Buffer} from 'buffer';
 
-// Buffer for parse() to handle types that span more than one buffer
+/**
+ * Buffer for parse() to handle types that span more than one buffer
+ * @type {Buffer}
+ */
 let SPANNING_BUF = new Buffer(1024);
 
 // Possibly call flush()
-const maybeFlush = function(b, o, len, flush) {
+const maybeFlush = (b, o, len, flush) => {
     if (o + len > b.length) {
         if (typeof(flush) !== 'function') {
             throw new Error(
@@ -25,25 +27,19 @@ const maybeFlush = function(b, o, len, flush) {
 };
 
 /**
- * Sentinel token interface
- */
-export interface ISentinelToken {
-}
-
-/**
  * The DEFER token indicates that the protocol doesn't know what type of token to read from the stream next.
  * Perhaps the protocol needs to consult some out-of-process datastructure, or wait for some other event to occur.
  * To support this case, the protocol callback is actually invoked with 2 arguments: the value and a defer callback.
  * It is this second parameter, a callback, that must be invoked with the desired token type once the protocol layer has figured this out.
  * Note that between the time DEFER is returned and the callback is invoked, strtok.parse() is buffering all data received from the stream.
  */
-export const DEFER: ISentinelToken = {};
+export const DEFER = {};
 
 /**
  * Indicates that the protocol parsing loop has come to an end, and that no more data need be read off of the stream
  * This causes strtok.parse() to disengage from the stream.
  */
-export const DONE: ISentinelToken = {};
+export const DONE = {};
 
 export interface IGetToken<T> {
 
@@ -82,7 +78,7 @@ export const UINT8: IToken<number> = {
 
     len: 1,
 
-    get: function (buf, off): number {
+    get(buf: Buffer, off: number): number {
         return buf[off];
     },
 
@@ -194,7 +190,7 @@ export const UINT24_BE: IToken<number> = {
         assert.ok(o >= 0);
         assert.ok(this.len <= b.length);
 
-        var no = maybeFlush(b, o, this.len, flush);
+        const no = maybeFlush(b, o, this.len, flush);
         b[no] = (v >>> 16) & 0xff;
         b[no + 1] = (v >>> 8) & 0xff;
         b[no + 2] = v & 0xff;
@@ -378,12 +374,9 @@ export const INT32_BE: IToken<number> = {
     }
 };
 
-
-// Complex types
-//
-// These types are intended to allow callers to re-use them by manipulating
-// the 'len' and other properties directly.
-
+/**
+ * Ignore a given number of bytes
+ */
 export class IgnoreType implements IGetToken<Buffer> {
 
     /**
@@ -401,7 +394,7 @@ export class IgnoreType implements IGetToken<Buffer> {
 
 export class BufferType implements IGetToken<Buffer> {
 
-    constructor(public len: number) {
+    public constructor(public len: number) {
     }
 
     public get(buf: Buffer, off: number): Buffer {
@@ -414,7 +407,7 @@ export class BufferType implements IGetToken<Buffer> {
  */
 export class StringType implements IGetToken<string> {
 
-    constructor(public len: number, public encoding: string) {
+    public constructor(public len: number, public encoding: string) {
     }
 
     public get(buf: Buffer, off: number): string {
@@ -440,7 +433,7 @@ export const parse = function(s: any, cb?: any) {
     let ignoreLen: number = 0;
 
     // Callback for FSM to tell us what type to expect next
-    let typeCallback = (t: IGetToken<any> | {}) => {
+    const typeCallback = (t: IGetToken<any> | {}) => {
         if (type !== DEFER) {
             throw new Error('refusing to overwrite non-DEFER type');
         }
@@ -456,10 +449,10 @@ export const parse = function(s: any, cb?: any) {
     // Out strategy for handling buffers is to shift them off of the bufs[]
     // array until we have enough accumulated to account for type.len bytes.
     const emitData = () => {
-        var b;
+        let b: Buffer;
         while (type !== DONE && type !== DEFER && bufsLen >= type.len) {
             b = bufs[0];
-            var bo = bufOffset;
+            let bo = bufOffset;
 
             assert.ok(bufOffset >= 0 && bufOffset < b.length);
 
@@ -559,7 +552,7 @@ export const parse = function(s: any, cb?: any) {
     };
 
     // Listen for data from our stream
-    const dataListener = function(d) {
+    const dataListener = function(d: Buffer) {
         if (d.length <= ignoreLen) {
           // ignore this data
           assert.strictEqual(bufsLen, 0);
@@ -591,4 +584,4 @@ export const parse = function(s: any, cb?: any) {
 // the 'len' and other properties directly
 
 
-export type AnyToken = IGetToken<any> | ISentinelToken
+export type AnyToken = IGetToken<any> | {}
