@@ -24,7 +24,11 @@ const maybeFlush = function(b, o, len, flush) {
     return o;
 };
 
-// Sentinel types
+/**
+ * Sentinel token interface
+ */
+export interface ISentinelToken {
+}
 
 /**
  * The DEFER token indicates that the protocol doesn't know what type of token to read from the stream next.
@@ -33,26 +37,41 @@ const maybeFlush = function(b, o, len, flush) {
  * It is this second parameter, a callback, that must be invoked with the desired token type once the protocol layer has figured this out.
  * Note that between the time DEFER is returned and the callback is invoked, strtok.parse() is buffering all data received from the stream.
  */
-export const DEFER = {};
+export const DEFER: ISentinelToken = {};
 
 /**
  * Indicates that the protocol parsing loop has come to an end, and that no more data need be read off of the stream
  * This causes strtok.parse() to disengage from the stream.
  */
-export const DONE = {};
+export const DONE: ISentinelToken = {};
 
 export interface IGetToken<T> {
 
+    /**
+     * Length in bytes of encoded value
+     */
     len: number;
 
-    get: (buf: Buffer, off: number) => T;
+    /**
+     * Decode value from buffer at offset
+     * @param buf Buffer to read the decoded value from
+     * @param off Decode offset
+     */
+    get(buf: Buffer, off: number): T;
+}
+
+export interface IToken<T> extends IGetToken<T> {
+    /**
+     * Encode value to buffer
+     * @param buffer Buffer to write the encoded value to
+     * @param offset Buffer write offset
+     * @param value Value to decode of type T
+     * @param flush ToDo
+     */
+    put(buffer: Buffer, offset: number, value: T, flush?: IFlush): number
 }
 
 export type IFlush = (b: Buffer, o: number) => void;
-
-export interface IToken<T> extends IGetToken<T> {
-    put: (buffer: Buffer, offset: number, value: T, flush?: IFlush) => number
-}
 
 // Primitive types
 
@@ -67,7 +86,7 @@ export const UINT8: IToken<number> = {
         return buf[off];
     },
 
-    put: function (b: Buffer, o: number, v: number, flush: IFlush): number {
+    put(b: Buffer, o: number, v: number, flush?: IFlush): number {
         assert.equal(typeof o, 'number');
         assert.equal(typeof v, 'number');
         assert.ok(v >= 0 && v <= 0xff);
@@ -88,11 +107,11 @@ export const UINT16_LE: IToken<number> = {
 
     len: 2,
 
-    get: function (buf, off): number {
+    get(buf: Buffer, off: number): number {
         return buf[off] | (buf[off + 1] << 8);
     },
 
-    put: function (b: Buffer, o: number, v: number, flush: IFlush): number {
+    put(b: Buffer, o: number, v: number, flush?: IFlush): number {
         assert.equal(typeof o, 'number');
         assert.equal(typeof v, 'number');
         assert.ok(v >= 0 && v <= 0xffff);
@@ -114,11 +133,11 @@ export const UINT16_BE: IToken<number> = {
 
     len: 2,
 
-    get: function (buf, off): number {
+    get(buf: Buffer, off: number): number {
         return (buf[off] << 8) | buf[off + 1];
     },
 
-    put: function (b: Buffer, o: number, v: number, flush: IFlush): number {
+    put(b: Buffer, o: number, v: number, flush?: IFlush): number {
         assert.equal(typeof o, 'number');
         assert.equal(typeof v, 'number');
         assert.ok(v >= 0 && v <= 0xffff);
@@ -140,11 +159,11 @@ export const UINT24_LE: IToken<number> = {
 
     len: 3,
 
-    get: function (buf, off): number {
+    get(buf: Buffer, off: number): number {
         return buf[off] | (buf[off + 1] << 8) | (buf[off + 2] << 16);
     },
 
-    put: function (b: Buffer, o: number, v: number, flush: IFlush): number {
+    put(b: Buffer, o: number, v: number, flush?: IFlush): number {
         assert.equal(typeof o, 'number');
         assert.equal(typeof v, 'number');
         assert.ok(v >= 0 && v <= 0xffffff);
@@ -165,10 +184,10 @@ export const UINT24_LE: IToken<number> = {
  */
 export const UINT24_BE: IToken<number> = {
     len : 3,
-    get : function (buf, off) {
+    get(buf: Buffer, off: number): number {
         return (((buf[off] << 8) + buf[off + 1]) << 8) + buf[off + 2]
     },
-    put : function(b, o, v, flush) {
+    put(b: Buffer, o: number, v: number, flush?: IFlush): number {
         assert.equal(typeof o, 'number');
         assert.equal(typeof v, 'number');
         assert.ok(v >= 0 && v <= 0xffffff);
@@ -191,7 +210,7 @@ export const UINT32_LE: IToken<number> = {
 
     len: 4,
 
-    get: function (buf, off): number {
+    get(buf: Buffer, off: number): number {
         // Shifting the MSB by 24 directly causes it to go negative if its
         // last bit is high, so we instead shift by 23 and multiply by 2.
         // Also, using binary OR to count the MSB if its last bit is high
@@ -200,7 +219,7 @@ export const UINT32_LE: IToken<number> = {
             ((buf[off + 3] << 23) * 2);
     },
 
-    put: function (b: Buffer, o: number, v: number, flush: IFlush): number {
+    put(b: Buffer, o: number, v: number, flush?: IFlush): number {
         assert.equal(typeof o, 'number');
         assert.equal(typeof v, 'number');
         assert.ok(v >= 0 && v <= 0xffffffff);
@@ -224,13 +243,13 @@ export const UINT32_BE: IToken<number> = {
 
     len: 4,
 
-    get: function (buf, off): number {
+    get(buf: Buffer, off: number): number {
         // See comments in UINT32_LE.get()
         return ((buf[off] << 23) * 2) +
             ((buf[off + 1] << 16) | (buf[off + 2] << 8) | buf[off + 3]);
     },
 
-    put: function (b: Buffer, o: number, v: number, flush: IFlush): number {
+    put(b: Buffer, o: number, v: number, flush?: IFlush): number {
         assert.equal(typeof o, 'number');
         assert.equal(typeof v, 'number');
         assert.ok(v >= 0 && v <= 0xffffffff);
@@ -254,14 +273,14 @@ export const INT8: IToken<number> = {
 
     len: 1,
 
-    get: function (buf, off): number {
+    get(buf: Buffer, off: number): number {
         const v = UINT8.get(buf, off);
         return ((v & 0x80) === 0x80) ?
             (-128 + (v & 0x7f)) :
             v;
     },
 
-    put: function (b: Buffer, o: number, v: number, flush: IFlush): number {
+    put(b: Buffer, o: number, v: number, flush?: IFlush): number {
         assert.equal(typeof o, 'number');
         assert.equal(typeof v, 'number');
         assert.ok(v >= -128 && v <= 127);
@@ -280,13 +299,13 @@ export const INT8: IToken<number> = {
  */
 export const INT16_BE: IToken<number> = {
     len: 2,
-    get: function (buf, off): number {
+    get(buf: Buffer, off: number): number {
         const v = UINT16_BE.get(buf, off);
         return ((v & 0x8000) === 0x8000) ?
             (-32768 + (v & 0x7fff)) :
             v;
     },
-    put: function (b: Buffer, o: number, v: number, flush: IFlush): number {
+    put(b: Buffer, o: number, v: number, flush?: IFlush): number {
         assert.equal(typeof o, 'number');
         assert.equal(typeof v, 'number');
         assert.ok(v >= -32768 && v <= 32767);
@@ -306,12 +325,12 @@ export const INT16_BE: IToken<number> = {
  */
 export const INT24_BE: IToken<number> = {
     len: 3,
-    get: function (buf, off): number {
+    get(buf: Buffer, off: number): number {
         const v = UINT24_BE.get(buf, off);
         return ((v & 0x800000) === 0x800000) ?
             (-0x800000 + (v & 0x7fffff)) : v;
     },
-    put: function (b: Buffer, o: number, v: number, flush: IFlush): number {
+    put(b: Buffer, o: number, v: number, flush?: IFlush): number {
         assert.equal(typeof o, 'number');
         assert.equal(typeof v, 'number');
         assert.ok(v >= -0x800000 && v <= 0x7fffff);
@@ -332,7 +351,7 @@ export const INT24_BE: IToken<number> = {
  */
 export const INT32_BE: IToken<number> = {
     len: 4,
-    get: function (buf, off): number {
+    get(buf: Buffer, off: number): number {
         // We cannot check for 0x80000000 directly, as this always returns
         // false. Instead, check for the two's-compliment value, which
         // behaves as expected. Also, we cannot subtract our value all at
@@ -342,7 +361,7 @@ export const INT32_BE: IToken<number> = {
             ((v & 0x7fffffff) - 1073741824 - 1073741824) :
             v;
     },
-    put: function (b: Buffer, o: number, v: number, flush: IFlush): number {
+    put(b: Buffer, o: number, v: number, flush?: IFlush): number {
         assert.equal(typeof o, 'number');
         assert.equal(typeof v, 'number');
         assert.ok(v >= -2147483648 && v <= 2147483647);
@@ -565,3 +584,11 @@ export const parse = function(s: any, cb?: any) {
         s.on('data', dataListener);
     }
 };
+
+// --- Complex types ---
+//
+// These types are intended to allow callers to re-use them by manipulating
+// the 'len' and other properties directly
+
+
+export type AnyToken = IGetToken<any> | ISentinelToken
