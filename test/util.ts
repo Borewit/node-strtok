@@ -123,17 +123,8 @@ export const runParseTests = function (s: string | EventEmitter, stateTab: handl
 
     let state = 0;
 
-    process.on('exit', () => {
-        assert.equal(stateTab.length, state);
-    });
-
     strtok.parse(s, (v, cb) => {
         assert.ok(state >= 0 && state < stateTab.length);
-        if (cleanup && state === stateTab.length - 1) {
-            process.nextTick(() => {
-                (s as EventEmitter).removeAllListeners()
-            })
-        };
         return stateTab[state++](v, cb);
     });
 };
