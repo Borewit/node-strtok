@@ -20,7 +20,7 @@
   ],
   "scripts": {
     "compile": "tsc",
-    "test": "mocha --require ts-node/register test",
+    "test": "mocha --require ts-node/register test/*.ts",
     "lint": "tslint --format verbose lib/*.ts"
   },
   "engines": {
