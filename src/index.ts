@@ -1,7 +1,6 @@
 // A fast streaming parser library.
 
 import * as assert from 'assert';
-import {Buffer} from 'buffer';
 
 /**
  * Buffer for parse() to handle types that span more than one buffer
