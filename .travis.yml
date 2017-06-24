@@ -5,7 +5,5 @@ node_js:
  - "7"
 install:
  - npm install
- - npm run compile
- - npm run dist
 script:
  - npm test
