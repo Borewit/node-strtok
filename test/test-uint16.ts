@@ -2,7 +2,7 @@
 
 import {} from "mocha"
 import {assert} from 'chai';
-import * as strtok from '../src';
+import * as strtok from '../lib';
 import * as util from './util';
 
 describe("Parse 16-bit unsigned integer", () => {

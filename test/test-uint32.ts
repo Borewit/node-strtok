@@ -2,7 +2,7 @@
 
 var assert = require('assert');
 var util = require('./util');
-var strtok = require('../src');
+var strtok = require('../lib');
 
 describe("Parse 32-bit unsigned integer", () => {
 
