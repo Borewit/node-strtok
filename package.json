@@ -54,5 +54,20 @@
     "typescript": "^2.3.4",
     "typings": "^2.1.1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "token-types": "0.0.2"
+  },
+  "keywords": [
+    "tokenizer",
+    "promise",
+    "parser",
+    "binary",
+    "endian",
+    "integer",
+    "uint",
+    "token",
+    "read",
+    "stream",
+    "streaming"
+  ]
 }

@@ -3,7 +3,7 @@
 import {assert} from 'chai'
 import {EventEmitter} from 'events'
 import  * as strtok from '../lib'
-import {IGetToken} from "../lib";
+import {IGetToken} from "token-types";
 
 /**
  * A mock stream implementation that breaks up provided data into

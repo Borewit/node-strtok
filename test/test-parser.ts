@@ -4,7 +4,7 @@ import {} from "mocha"
 import {assert} from 'chai';
 import * as util from './util';
 import * as strtok from '../lib';
-import {IGetToken} from '../lib';
+import {IGetToken} from 'token-types';
 import {EventEmitter} from 'events'
 
 describe("Parser", () => {

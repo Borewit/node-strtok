@@ -22,7 +22,7 @@ pick up where it left off. To make this task easier, `node-strtok` provides
 
 ## Usage
 
-The `node-strtok` library has only one method: `parse()`.  This method takes a
+The `strtok2` library has only one method: `parse()`.  This method takes a
 `net.Stream` (really any `EventEmitter` that pumps out `data` events) and a
 callback, which is invoked when a complete token has been read from the stream.
 The callback takes a single argument: the token just read from the stream, and
@@ -61,10 +61,7 @@ in parsing that structure.
 * `INT24_BE`, `INT24_LE`
 * `INT32_BE`
 
-One might notice that there is no support for 64-bit tokens, since JavaScript
-seems to limit value size to less than 2^64. Rather than wrapping up an
-additional math library to handle this, I wanted to stick with JavaScript
-primitives. Maybe this will change later if this becomes important.
+Tokens are derived from: [token-types](https://github.com/Borewit/token-types).
 
 #### Special tokens
 
@@ -110,16 +107,18 @@ common behavior that take advantage of this
 Implementing such types is extremely simple. The `BufferType` implementation
 is given below:
 
-    var BufferType = function(l) {
-        var self = this;
+```javascript
+var BufferType = function(l) {
+    var self = this;
 
-        self.len = l;
+    self.len = l;
 
-        self.get = function(buf, off) {
-            return buf.slice(off, off + this.len);
-        };
+    self.get = function(buf, off) {
+        return buf.slice(off, off + this.len);
     };
-    exports.BufferType = BufferType;
+};
+exports.BufferType = BufferType;
+```
 
 ### A simple example
 
@@ -127,26 +126,29 @@ Below is an example of a parser for a simple protocol. Each message is a
 UTF-8 string, prefixed with a big-endian unsigned 32-bit integer used as a
 length specifier.
 
-    var strotk = require('strtok');
+```javascript
+var strtok = require('strtok');
+var Token = require('token-types');
 
-    var s = ... /* a net.Stream workalike */;
-    
-    var numBytes = -1;
-    
-    strtok.parse(s, function(v, cb) {
-        if (v === undefined) {
-            return strtok.UINT32_BE;
-        }
-    
-        if (numBytes == -1) {
-            numBytes = v;
-            return new strtok.StringType(v, 'utf-8');
-        }
+var s = ... // a net.Stream workalike
 
-        console.log('Read ' + v);
-        numBytes = -1;
-        return strtok.UINT32_BE;
-    });
+var numBytes = -1;
+
+strtok.parse(s, function(v, cb) {
+    if (v === undefined) {
+        return Token.UINT32_BE;
+    }
+
+    if (numBytes === -1) {
+        numBytes = v;
+        return new Token.StringType(v, 'utf-8');
+    }
+
+    console.log('Read ' + v);
+    numBytes = -1;
+    return Token.UINT32_BE;
+});
+```
 
 When the callback is first invoked, we aren't in the midst of reading a
 message, so we ask for a `UINT32_BE` to get the length of the subsequent
