@@ -5,6 +5,8 @@
 
 A streaming tokenizer for [NodeJS](http://nodejs.org).
 
+See also **strtok3** on [github.com](https://github.com/Borewit/strtok3) or [npmjs.org](https://npmjs.org/package/strtok3)
+
 Parsing data coming off the wire in an event-driven environment can be a
 difficult proposition, with naive implementations buffering all received data
 in memory until a message has been received in its entirety. Not only is this
