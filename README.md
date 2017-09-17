@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/Borewit/strtok2.svg?branch=master)](https://travis-ci.org/Borewit/strtok2)
 [![NPM version](https://badge.fury.io/js/strtok2.svg)](https://npmjs.org/package/strtok2)
 [![npm downloads](http://img.shields.io/npm/dm/strtok2.svg)](https://npmjs.org/package/strtok2)
-[![Dependencies](https://david-dm.org/Borewit/strtok2.svg)](https://github.com/Borewit/strtok2)
+[![Dependencies](https://david-dm.org/Borewit/strtok2.svg)](https://david-dm.org/Borewit/strtok2)
 
 A streaming tokenizer for [NodeJS](http://nodejs.org).
 
