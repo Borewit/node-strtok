@@ -1,6 +1,6 @@
 {
   "name": "strtok2",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "A streaming tokenizer",
   "author": {
     "name": "Borewit",
@@ -39,23 +39,23 @@
     "url": "https://github.com/Borewit/strtok2/issues"
   },
   "devDependencies": {
-    "@types/chai": "^4.0.0",
-    "@types/mocha": "^2.2.41",
-    "@types/node": "^7.0.31",
-    "chai": "^4.0.2",
+    "@types/chai": "^4.0.4",
+    "@types/mocha": "^2.2.43",
+    "@types/node": "^7.0.43",
+    "chai": "^4.1.2",
     "debug": "^2.6.8",
     "del": "^3.0.0",
     "gulp": "^3.9.1",
     "gulp-clean": "^0.3.2",
     "gulp-mocha": "^4.3.1",
     "gulp-tsc": "^1.3.2",
-    "mocha": "^3.4.2",
-    "ts-node": "^3.0.6",
-    "typescript": "^2.3.4",
+    "mocha": "^3.5.3",
+    "ts-node": "^3.3.0",
+    "typescript": "^2.5.2",
     "typings": "^2.1.1"
   },
   "dependencies": {
-    "token-types": "0.0.2"
+    "token-types": "^0.1.2"
   },
   "keywords": [
     "tokenizer",
